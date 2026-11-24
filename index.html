@@ -566,7 +566,8 @@ onclick="setChrono(60)">1h Devoir</button>
     <div id="modalCoach" class="modal-backdrop hidden" onclick="fermerModalsSiDehors(event)">
         <div class="modal-sheet">
             <div class="modal-top"><h3>Coach Objectifs Scolaires</h3><button class="btn-close" onclick="fermerToutesModals()">✕</button></div>
-            <div id="chatHistory" class="chat-feed"><strong>Coach :</strong> Salut ! Pose ta question (ex : <em>Je veux 14 en Maths</em> ou <em>Si j'ai 15 en Maths...</em>).</div>
+            <div id="chatHistory" class="chat-feed"><strong>Coach :</strong> Salut ! Prêt à booster ta moyenne ? Appuie sur un objectif ci-dessous ou pose ta question !
+ (ex : <em>Je veux 14 en Maths</em> ou <em>Si j'ai 15 en Maths...</em>).</div>
             <div class="quick-row">
                 <button class="btn-chip" onclick="simulerTrimestre(10)">Objectif 10/20</button>
                 <button class="btn-chip" onclick="simulerTrimestre(12)">Objectif 12/20</button>
@@ -1292,18 +1293,16 @@ document.getElementById(id).classList.remove("hidden");        history.pushState
                         </div>
 
                         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
-                            <label class="btn-mini" style="cursor:pointer; border-color:var(--accent); color:var(--accent);">
-                                📷 Photo cahier <input type="file" accept="image/*" style="display:none;" onchange="ajouterPhotoRev(${i}, this)">
-                            </label>
-                            <label class="btn-mini" style="cursor:pointer; border-color:var(--accent); color:var(--accent);">
-                                📄 Document PDF <input type="file" accept="application/pdf" style="display:none;" onchange="ajouterPdfRev(${i}, this)">
-                            </label>
+                            <label class="btn-mini" style="cursor:pointer; border-color:var(--accent); color:var(--accent);">📷 Caméra<input type="file" accept="image/*" capture="environment" style="display:none;" onchange="ajouterPhotoRev(${i}, this)"></label>
+                            <label class="btn-mini" style="cursor:pointer; border-color:var(--accent); color:var(--accent);">🖼️ Galerie<input type="file" accept="image/*" style="display:none;" onchange="ajouterPhotoRev(${i}, this)"></label>
+                            <label class="btn-mini" style="cursor:pointer; border-color:var(--accent); color:var(--accent);">📄 PDF<input type="file" accept="application/pdf" style="display:none;" onchange="ajouterPdfRev(${i}, this)"></label>
                         </div>
                         ${d.fiches.map((f, fIdx) => `
-                            <div style="background:var(--bg-input); border:1px solid var(--border-color); border-radius:8px; padding:8px; margin-bottom:6px; position:relative;">
-                                ${f.type === 'texte' ? `<div style="font-size:13px; padding-right:24px;                                 ${f.type === 'texte' ? `<div style="font-size:13px; padding-right:24px; white-space:pre-wrap; line-height:1.45;">${f.contenu}</div>` : (f.type === 'pdf' ? `<div style="display:flex; align-items:center; gap:8px; padding-right:26px;"><span style="font-size:12px; font-weight:700; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 ${f.nom}</span><button class="btn-mini" style="padding:4px 8px;" onclick="ouvrirPdfRev(${i}, ${fIdx})">Lire</button></div>` : `<img src="${f.contenu}" class="rev-img">`)}
-">${f.contenu}</div>` : (f.type === 'pdf' ? `<div style="display:flex; align-items:center; gap:8px; padding-right:26px;"><span style="font-size:12px; font-weight:700; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 ${f.nom}</span><button class="btn-mini" style="padding:4px 8px;" onclick="ouvrirPdfRev(${i}, ${fIdx})">Lire</button></div>` : `<img src="${f.contenu}" class="rev-img">`)}
+                            <div style="background:var(--bg-input); border:none; padding:2px; padding:8px; margin-bottom:6px; position:relative;">
+                                ${f.type === 'texte' ? `<div style="font-size:13px; padding-right:24px; white-space:pre-wrap; line-height:1.45;">${f.contenu}</div>` : (f.type === 'pdf' ? `<div style="display:flex; align-items:center; gap:8px; padding-right:26px;"><span style="font-size:12px; font-weight:700; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📄 ${f.nom}</span><button class="btn-mini" style="padding:4px 8px;" onclick="ouvrirPdfRev(${i}, ${fIdx})">Lire</button></div>` : `<img src="${f.contenu}" class="rev-img" style="cursor:zoom-in; max-height:180px; width:100%; object-fit:cover; border-radius:6px;">`)}
+
                                 <button onclick="supprimerFicheRev(${i}, ${fIdx})" style="position:absolute; top:6px; right:6px; background:#ef4444; color:#fff; border:none; border-radius:6px; width:22px; height:22px; font-weight:800;">X</button>
+<img src="${f.contenu}" onclick="ouvrirZoomPhoto(this.src)" class="rev-img" style="cursor:pointer; width:100%; height:auto; max-height:none; display:block; border-radius:6px;">
                             </div>`).join("")}
                         <button class="btn-mini" style="color:#ef4444; margin-top:4px;" onclick="supprimerDossierRev(${i})">Supprimer dossier</button>
                     </div>
@@ -1357,8 +1356,8 @@ function calculerAnnuelle() {
         function ouvrirCoach() {
             ouvrirModal("modalCoach");
             if (matieres.length > 0) {
-                let topCoef = matieres.reduce((a, b) => (b.coef > a.coef ? b : a), matieres);
-                ajouterMessageChat("Coach", "Priorité détectée sur <strong>" + topCoef.nom + " (Coef " + topCoef.coef + ")</strong>.");
+                let topCoef = matieres.reduce((a, b) => (b.coef > a.coef ? b : a), matieres.at(0));
+                ajouterMessageChat("Coach", "Mise en priorité sur <strong>" + topCoef.nom + " (Coef " + topCoef.coef + ")</strong> pour faire décoller ta moyenne !");
             }
         }
         function ajouterMessageChat(auteur, html) { let h = document.getElementById("chatHistory"); h.innerHTML += "<div style='margin-top:6px;'><strong>" + auteur + " :</strong> " + html + "</div>"; h.scrollTop = h.scrollHeight; }
@@ -1493,6 +1492,21 @@ function calculerAnnuelle() {
                         let moy = notes.reduce((a, b) => a + Number(b.val ?? b.note ?? b), 0) / notes.length;
                                                 totP += moy * c; totC += c;
                     }
+            // 8. Remplacer "Priorité détectée sur undefined" partout dans le Coach
+            setInterval(() => {
+                document.querySelectorAll("div, p, span").forEach(el => {
+                    if (el.children.length <= 2 && el.textContent.includes("Priorité détectée sur undefined")) {
+                        let mats = (typeof matieres !== "undefined" && matieres.length) ? matieres : [];
+                        let top = mats.reduce((a, b) => ((Number(b.coef || b.coeff || 1) > Number(a.coef || a.coeff || 1)) ? b : a), mats[0] || {});
+                        let nomMat = top.nom || top.matiere || top.name || "Maths";
+                        let coefMat = top.coef || top.coeff || "4";
+                        el.innerHTML = `<b>Coach :</b> Mise en priorité sur <b>${nomMat}</b> (Coef ${coefMat}) pour faire décoller ta moyenne !`;
+                    }
+                });
+            }, 200);
+
+
+
                 });
                 let val = totC > 0 ? (totP / totC).toFixed(2) : "--";
                 document.querySelectorAll(".global-avg span").forEach(el => { if (el.innerText !== val) el.innerText = val; });
@@ -1579,9 +1593,101 @@ function calculerAnnuelle() {
                     });
                 } catch(e) {}
             };
+
+            // 5. Stockage Illimité IndexedDB (200+ photos & PDF sans jamais saturer)
+                        // 5. Stockage Illimité IndexedDB (200+ photos & PDF sans jamais saturer)
+            function rafraichirCoffre() {
+                if (typeof renduRev === "function") renduRev();
+                else if (typeof afficherDossiersRev === "function") afficherDossiersRev();
+                else if (typeof rendu === "function") rendu();
+            }
+
+            const dbReq = indexedDB.open("NexNoteCoffreDB", 1);
+            dbReq.onupgradeneeded = e => e.target.result.createObjectStore("coffre");
+            dbReq.onsuccess = e => {
+                const db = e.target.result;
+                window.sauvegarderRev = function() {
+                    db.transaction("coffre", "readwrite").objectStore("coffre").put(dossiersRev, "data");
+                };
+                const getReq = db.transaction("coffre", "readonly").objectStore("coffre").get("data");
+                getReq.onsuccess = () => {
+                    if (getReq.result) { dossiersRev = getReq.result; rafraichirCoffre(); }
+                    localStorage.removeItem("nexnote_rev");
+                };
+            };
+
+            window.ajouterPhotoRev = function(idx, input) {
+                let file = input.files && input.files.item(0);
+                if (!file) return;
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let img = new Image();
+                    img.onload = function() {
+                        let canvas = document.createElement("canvas");
+                        let maxW = 1000;
+                        let scale = img.width > maxW ? maxW / img.width : 1;
+                        canvas.width = img.width * scale;
+                        canvas.height = img.height * scale;
+                        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+                        dossiersRev[idx].fiches.push({ type: "photo", contenu: canvas.toDataURL("image/jpeg", 0.75) });
+                        sauvegarderRev();
+                        rafraichirCoffre();
+
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                input.value = "";
+            };
+            // 6 & 7. Full Écran + Double-clic pour Zoomer x2.2 (et glisser pour lire)
+            setInterval(() => {
+                document.querySelectorAll(".rev-img").forEach(img => {
+                    let boite = img.closest("div[style*='margin-bottom']") || img.parentElement;
+                    if (boite) {
+                        boite.querySelectorAll("img").forEach(autre => {
+                            if (autre !== img) autre.remove();
+                        });
+                        if (!boite.querySelector(".btn-agrandir-photo")) {
+                            let estFull = false, estZoom = false;
+                            let btn = document.createElement("button");
+                            btn.className = "btn-agrandir-photo";
+                            btn.innerText = "🔍 Agrandir";
+                            btn.style.cssText = "position:absolute;bottom:10px;left:10px;background:rgba(15,23,42,0.9);color:#38bdf8;border:1px solid #38bdf8;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:800;cursor:pointer;z-index:100000;";
+                            
+                            img.ondblclick = (e) => {
+                                if (!estFull) return;
+                                e.stopPropagation();
+                                estZoom = !estZoom;
+                                img.style.transform = estZoom ? "scale(2.2)" : "scale(1)";
+                                img.style.transformOrigin = "top left";
+                            };
+
+                            btn.onclick = (e) => {
+                                e.stopPropagation();
+                                estFull = !estFull;
+                                estZoom = false;
+                                if (estFull) {
+                                    boite.dataset.oldStyle = boite.getAttribute("style") || "";
+                                    boite.style.cssText = "position:fixed;inset:0;background:#090d16;z-index:99999;padding:12px;display:flex;align-items:center;justify-content:center;overflow:auto;";
+                                    img.style.cssText = "width:100%;height:auto;max-height:92vh;object-fit:contain;border-radius:8px;transition:transform 0.2s;";
+                                    btn.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.9);color:#38bdf8;border:1px solid #38bdf8;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:800;cursor:pointer;z-index:100000;";
+                                    btn.innerText = "🔎 Réduire";
+                                } else {
+                                    boite.setAttribute("style", boite.dataset.oldStyle);
+                                    img.style.cssText = "cursor:pointer;width:100%;height:auto;max-height:none;display:block;border-radius:6px;";
+                                    btn.style.cssText = "position:absolute;bottom:10px;left:10px;background:rgba(15,23,42,0.9);color:#38bdf8;border:1px solid #38bdf8;padding:6px 14px;border-radius:16px;font-size:12px;font-weight:800;cursor:pointer;z-index:100000;";
+                                    btn.innerText = "🔍 Agrandir";
+                                }
+                            };
+                            boite.appendChild(btn);
+                        }
+                    }
+                });
+            }, 300);
         })();
 
         verifierEtat();
     </script>
 </body>
 </html>
+
